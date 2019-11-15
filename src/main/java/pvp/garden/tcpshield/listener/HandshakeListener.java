@@ -54,9 +54,9 @@ public class HandshakeListener {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (!isProxyConnection) {
+            if (plugin.isOnlyAllowProxyConnections() && !isProxyConnection) {
                 plugin.getLogger().warning("Disconnecting " + event.getConnection().getRemoteAddress().getHostName()
-                        + " because no proxy info was received.");
+                        + " because no proxy info was received and only-allow-proxy-connections is enabled.");
 
                 try {
                     VelocityReflection.forceDisconnect(event.getConnection());
