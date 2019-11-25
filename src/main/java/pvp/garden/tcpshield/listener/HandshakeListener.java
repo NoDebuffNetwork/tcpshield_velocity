@@ -22,7 +22,7 @@ public class HandshakeListener {
             String raw = VelocityReflection.getHostname(event.getConnection());
 
             if (raw.contains("//")) {
-                String[] payload = raw.split("///");
+                String[] payload = raw.split("///", 4);
 
                 if (payload.length >= 4) {
                     String hostname = payload[0];
