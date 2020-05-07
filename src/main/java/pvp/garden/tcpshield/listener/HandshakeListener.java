@@ -22,33 +22,43 @@ public class HandshakeListener {
             String raw = VelocityReflection.getHostname(event.getConnection());
 
             if (raw.contains("//")) {
-                String[] payload = raw.split("///", 4);
+                String[] payload = raw.split("///", 3);
 
-                if (payload.length >= 4) {
+                if (payload.length >= 3) {
                     String hostname = payload[0];
                     String ipData = payload[1];
-                    int timestamp = Integer.parseInt(payload[2]);
-                    String signature = payload[3];
+                    String[] ts_sig = payload[2].split("///", 2);
 
-                    String[] hostnameParts = ipData.split(":");
-                    String host = hostnameParts[0];
-                    int port = Integer.parseInt(hostnameParts[1]);
+                    if (ts_sig.length >= 2) {
+                        int timestamp = Integer.parseInt(ts_sig[0]);
+                        String signature = ts_sig[1];
 
-                    String reconstructedPayload = hostname + "///" + host + ":" + port + "///" + timestamp;
+                        String[] hostnameParts = ipData.split(":");
+                        String host = hostnameParts[0];
+                        int port = Integer.parseInt(hostnameParts[1]);
 
-                    if (!Signing.verify(reconstructedPayload.getBytes(StandardCharsets.UTF_8), signature)) {
-                        throw new Exception("Couldn't verify signature.");
+                        String reconstructedPayload = hostname + "///" + host + ":" + port + "///" + timestamp;
+
+                        if (signature.contains("%%%")) {
+                            signature = signature.split("%%%", 2)[0];
+                        }
+
+                        if (!Signing.verify(reconstructedPayload.getBytes(StandardCharsets.UTF_8), signature)) {
+                            throw new Exception("Couldn't verify signature.");
+                        }
+
+                        hostname = hostname.replace("%%%", "\u0000");
+
+                        isProxyConnection = true;
+
+                        VelocityReflection.setConnectionFields(
+                                event.getConnection(),
+                                host,
+                                port,
+                                hostname,
+                                new InetSocketAddress(host, port)
+                        );
                     }
-
-                    isProxyConnection = true;
-
-                    VelocityReflection.setConnectionFields(
-                            event.getConnection(),
-                            host,
-                            port,
-                            hostname,
-                            new InetSocketAddress(host, port)
-                    );
                 }
             }
         } catch (Exception e) {
