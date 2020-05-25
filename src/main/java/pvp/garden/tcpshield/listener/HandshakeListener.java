@@ -47,8 +47,16 @@ public class HandshakeListener {
                             throw new Exception("Couldn't verify signature.");
                         }
 
-                        hostname = hostname.replace("%%%", "\u0000");
+                        long currentTime = System.currentTimeMillis() / 1000;
 
+                        if(!(timestamp >= (currentTime - 2) && timestamp <= (currentTime + 2))) {
+                            /*if(this.debugMode) {
+                                getLogger().warning("Current time: " + currentTime + ", Timestamp Time: "  + timestamp);
+                            }*/
+                            throw new Exception("Invalid signature timestamp, please check system's local clock if error persists.");
+                        }
+
+                        hostname = hostname.replace("%%%", "\u0000");
                         isProxyConnection = true;
 
                         VelocityReflection.setConnectionFields(
