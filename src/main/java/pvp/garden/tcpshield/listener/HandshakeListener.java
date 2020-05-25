@@ -47,12 +47,32 @@ public class HandshakeListener {
                             signature = signature.split("%%%", 2)[0];
                         }
 
-                        if (!Signing.verify(reconstructedPayload.getBytes(StandardCharsets.UTF_8), signature)) {
-                            throw new Exception("Couldn't verify signature.");
+                        try {
+                            if (!Signing.verify(reconstructedPayload.getBytes(StandardCharsets.UTF_8), signature)) {
+                                throw new Exception("Couldn't verify signature.");
+                            }
+                        } catch (IllegalArgumentException e) {
+                            plugin.getLogger().severe("Error with reconstructed payload " + reconstructedPayload);
+
+                            try {
+                                VelocityReflection.forceDisconnect(event.getConnection());
+                            } catch (Exception e2) {
+                                e2.printStackTrace();
+                            }
+
+                            return;
+                        }
+
+                        long currentTime = System.currentTimeMillis() / 1000;
+
+                        if(!(timestamp >= (currentTime - 2) && timestamp <= (currentTime + 2))) {
+                            /*if(this.debugMode) {
+                                getLogger().warning("Current time: " + currentTime + ", Timestamp Time: "  + timestamp);
+                            }*/
+                            throw new Exception("Invalid signature timestamp, please check system's local clock if error persists.");
                         }
 
                         hostname = hostname.replace("%%%", "\u0000");
-
                         isProxyConnection = true;
 
                         VelocityReflection.setConnectionFields(
