@@ -43,8 +43,20 @@ public class HandshakeListener {
                             signature = signature.split("%%%", 2)[0];
                         }
 
-                        if (!Signing.verify(reconstructedPayload.getBytes(StandardCharsets.UTF_8), signature)) {
-                            throw new Exception("Couldn't verify signature.");
+                        try {
+                            if (!Signing.verify(reconstructedPayload.getBytes(StandardCharsets.UTF_8), signature)) {
+                                throw new Exception("Couldn't verify signature.");
+                            }
+                        } catch (IllegalArgumentException e) {
+                            plugin.getLogger().severe("Error with reconstructed payload " + reconstructedPayload);
+
+                            try {
+                                VelocityReflection.forceDisconnect(event.getConnection());
+                            } catch (Exception e2) {
+                                e2.printStackTrace();
+                            }
+
+                            return;
                         }
 
                         long currentTime = System.currentTimeMillis() / 1000;
