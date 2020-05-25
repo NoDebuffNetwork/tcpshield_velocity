@@ -20,6 +20,10 @@ public class HandshakeListener {
 
         try {
             String raw = VelocityReflection.getHostname(event.getConnection());
+            String[] rawSplit = raw.split("\0", 2);
+            if (rawSplit.length > 1) {
+                raw = rawSplit[0];
+            }
 
             if (raw.contains("//")) {
                 String[] payload = raw.split("///", 3);
