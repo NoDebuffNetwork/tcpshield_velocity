@@ -26,6 +26,7 @@ public class VelocityReflection {
     // InitialInboundConnection
     private static Field handshakeField;
     private static Field connectionField;
+    private static Field cleanedAddressField;
 
     // Handshake
     private static Field serverAddressField;
@@ -60,6 +61,9 @@ public class VelocityReflection {
 
             connectionField = initialInboundConnectionClass.getDeclaredField("connection");
             connectionField.setAccessible(true);
+
+            cleanedAddressField = initialInboundConnectionClass.getDeclaredField("cleanedAddress");
+            cleanedAddressField.setAccessible(true);
 
             serverAddressField = handshakeClass.getDeclaredField("serverAddress");
             serverAddressField.setAccessible(true);
@@ -105,5 +109,6 @@ public class VelocityReflection {
 
         connectionRemoteAddressField.set(connection, virtualHost);
         serverAddressField.set(handshake, hostname);
+        cleanedAddressField.set(inbound, hostname);
     }
 }
