@@ -18,6 +18,11 @@
             <id>sponge-repo</id>
             <url>https://repo.spongepowered.org/maven</url>
         </repository>
+
+        <repository>
+            <id>brigadier-repo</id>
+            <url>https://libraries.minecraft.net</url>
+        </repository>
     </repositories>
 
     <dependencies>
